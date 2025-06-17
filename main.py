@@ -10,8 +10,8 @@ from langchain_core.runnables import RunnableParallel, RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
 from langchain_community.vectorstores.azuresearch import AzureSearch
 # MemorySaver class from LangGraph is used to manage message history.
-from langgraph.checkpoint.memory import MemorySaver
-from langgraph.graph import StateGraph, END
+# from langgraph.checkpoint.memory import MemorySaver
+# from langgraph.graph import StateGraph, END
 from langchain_core.messages import HumanMessage, AIMessage
 
 
@@ -53,13 +53,13 @@ embedding_model = AzureOpenAIEmbeddings(
 )
 
 # === Initialize Vector Store ===
-vectorstore = AzureSearch(
-    azure_search_endpoint=AZURE_SEARCH_ENDPOINT,
-    azure_search_key=AZURE_SEARCH_KEY,
-    index_name=AZURE_SEARCH_INDEX_NAME,
-    embedding_function=embedding_model.embed_query
-)
-retriever = vectorstore.as_retriever(search_type="similarity", k=5)
+# vectorstore = AzureSearch(
+#     azure_search_endpoint=AZURE_SEARCH_ENDPOINT,
+#     azure_search_key=AZURE_SEARCH_KEY,
+#     index_name=AZURE_SEARCH_INDEX_NAME,
+#     embedding_function=embedding_model.embed_query
+# )
+#retriever = vectorstore.as_retriever(search_type="similarity", k=5)
 
 
 qa_chain = (
@@ -117,7 +117,6 @@ if __name__ == "__main__":
         user_input = input("You: ")
         if user_input.lower() in ["exit", "quit"]:
             print("Assistant: Goodbye!")
-            vectorstore.
             break
         if state is None:
             print("Assistant: [Fatal error, state is None]")
