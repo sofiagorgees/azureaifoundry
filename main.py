@@ -10,8 +10,8 @@ from langchain_core.runnables import RunnableParallel, RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
 from langchain_community.vectorstores.azuresearch import AzureSearch
 # MemorySaver class from LangGraph is used to manage message history.
-from langgraph.checkpoint.memory import MemorySaver
-from langgraph.graph import StateGraph, END
+# from langgraph.checkpoint.memory import MemorySaver
+# from langgraph.graph import StateGraph, END
 from langchain_core.messages import HumanMessage, AIMessage
 
 
@@ -53,13 +53,13 @@ embedding_model = AzureOpenAIEmbeddings(
 )
 
 # === Initialize Vector Store ===
-vectorstore = AzureSearch(
-    azure_search_endpoint=AZURE_SEARCH_ENDPOINT,
-    azure_search_key=AZURE_SEARCH_KEY,
-    index_name=AZURE_SEARCH_INDEX_NAME,
-    embedding_function=embedding_model.embed_query
-)
-retriever = vectorstore.as_retriever(search_type="similarity", k=5)
+# vectorstore = AzureSearch(
+#     azure_search_endpoint=AZURE_SEARCH_ENDPOINT,
+#     azure_search_key=AZURE_SEARCH_KEY,
+#     index_name=AZURE_SEARCH_INDEX_NAME,
+#     embedding_function=embedding_model.embed_query
+# )
+#retriever = vectorstore.as_retriever(search_type="similarity", k=5)
 
 
 qa_chain = (
@@ -105,34 +105,9 @@ graph.add_node("chat", chat_node)
 graph.set_entry_point("chat")
 graph.add_edge("chat", END)
 
-# === Initialize MemorySaver Instead of ConversationBufferMemory ===
+# === Initialize MemorySaver
 memory = MemorySaver()
-
 app = graph.compile(checkpointer=memory)
-
-# === Wrap with Message History using the MemorySaver instance ===
-# chat_with_memory = RunnableWithMessageHistory(
-#     qa_chain,
-#     lambda thread_id memory,  # Now returns your GraphMemory instance
-#     input_messages_key="query"
-# )
-
-# === Run the Chat ===
-# if __name__ == "__main__":
-#     print("💬 Azure AI Foundry Chat with LangGraph Memory (type 'exit' to quit)")
-#     thread_id = "user-session-1"
-#     state = ChatState(messages=[])
-#     while True:
-#         user_input = input("You: ")
-#         if user_input.lower() in ["exit", "quit"]:
-#             break
-#         state["messages"].append(HumanMessage(content=user_input))
-#         state = app.invoke(state, config={"configurable": {"thread_id": thread_id}})
-#         if state is None or "messages" not in state or not state["messages"]:
-#             print("Assistant: [No response]")
-#         else:
-#             print("Assistant:", state["messages"][-1].content)
-#         #print("Assistant:", state["messages"][-1].content)
 
 if __name__ == "__main__":
     print("💬 Azure AI Foundry Chat with LangGraph Memory (type 'exit' to quit)")
@@ -141,6 +116,7 @@ if __name__ == "__main__":
     while True:
         user_input = input("You: ")
         if user_input.lower() in ["exit", "quit"]:
+            print("Assistant: Goodbye!")
             break
         if state is None:
             print("Assistant: [Fatal error, state is None]")
