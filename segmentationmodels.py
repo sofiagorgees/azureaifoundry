@@ -1,20 +1,43 @@
+import os
+from dotenv import load_dotenv
 from azure.ai.projects import AIProjectClient
 from azure.identity import DefaultAzureCredential
 from azure.ai.agents.models import ListSortOrder
 
+load_dotenv()
+
 project = AIProjectClient(
     credential=DefaultAzureCredential(),
-    endpoint=" NEEDS ENDPOINT")
+    endpoint=os.getenv("AZURE_FOUNDRY_ENDPOINT"))
 
+agentIdList = ["asst_1DYZAop1Obe8KQSVucC7JcpW", "asst_HIq5x9Gelzk6PlfX30LpIMxy", "asst_yksk9SIQhvbf4dCLnoKHPNM8", "asst_w79HcJ15MGIat8yvZNcW4kqs", "asst_DXpD2zd3Uc3t6gRxu9IdBl8Y"]
 
-agent = project.agents.get_agent("ADD AGENT")
+print("Which agent would you like to chat with?")
+agents = ["Image Conscious Enthusiast","Practical DIYer","Car-Involved Tinker", "Diligent Delegator", "Disinterested Value Seeker"]
+
+for i in range(len(agentIdList)):
+    print(f"{i + 1}. {agents[i]}")
+
+agent_choice = input("Enter the number of the agent you want to chat with: ")
+
+print("Which model would you like to use?\n\t1. gpt-4o\n\t2. gpt-4.1")
+model_choice = input("Enter the number of the model you want to use: ")
+if model_choice == "1":
+    model = "gpt-4o"
+elif model_choice == "2":
+    model = "gpt-4.1"
+
+agent = project.agents.get_agent(agentIdList[int(agent_choice) - 1])
+project.agents.update_agent(
+    agent.id,
+    model=model
+)
 
 thread = project.agents.threads.create()
 print(f"Created thread, ID: {thread.id}")
+print('Hello, I am the ' + agents[int(agent_choice) - 1] + ' model!\n If you want to end the chat type exit ,quit, q')
 
-chat = True
-print('Hello, I am the ENTER MODEL!\n If you want to end the chat type exit ,quit, q')
-while chat:
+while True:
     user_prompt = input("\n-You: ")
     if user_prompt.lower() in ["exit", "quit", "q"]:
         print("Ending chat session.")
