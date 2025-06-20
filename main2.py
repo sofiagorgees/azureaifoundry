@@ -7,7 +7,7 @@ from azure.identity import DefaultAzureCredential
 from azure.ai.agents.models import ListSortOrder
 
 from azure.ai.inference import ChatCompletionsClient
-from azure.ai.inference.models import SystemMessage, UserMessage
+from azure.ai.inference.models import SystemMessage, AssistantMessage, UserMessage
 from azure.core.credentials import AzureKeyCredential
 
 # Create project client with default azure credentials and endpoint from environment variable
@@ -22,6 +22,32 @@ client = ChatCompletionsClient(
     credential= AzureKeyCredential(os.getenv("AZURE_FOUNDRY_API_KEY")), 
     api_version="2024-05-01-preview"
 )
+chat_history = [{"role": "system", "content": "You are a helpful assistant."}]
+
+print('Hello, I am the model!\n If you want to end the chat type exit, quit, q')
+
+while True:
+    user_input = input("User: ")
+    if user_input.lower() == "exit":
+        break
+
+    # Add user message to chat history
+    chat_history.append({"role": "user", "content": user_input})
+
+    # Call Azure OpenAI
+    response = client.complete(
+        model=model_name,
+        messages=chat_history,
+        temperature=0.7,
+        max_tokens=500
+    )
+
+    # Get assistant's reply
+    assistant_message = response.choices[0].message
+    print(f"Assistant: {assistant_message.content}\n")
+
+    # Add assistant reply to chat history
+    chat_history.append({"role": assistant_message.role, "content": assistant_message.content})
 
 response = client.complete(
     messages=[
