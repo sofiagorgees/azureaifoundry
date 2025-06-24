@@ -5,6 +5,26 @@ from azure.identity import DefaultAzureCredential
 from azure.ai.agents.models import ListSortOrder
 
 load_dotenv()
+# Upload a file to OneDrive for Business using Office365-REST-Python-Client
+from office365.sharepoint.client_context import ClientContext
+from office365.runtime.auth.user_credential import UserCredential
+
+# 1. Point at your OneDrive for Business site (it’s just a special SP site):
+site_url = 'https://oldworld-my.sharepoint.com/personal/sgorgees_oldworldind_com'
+
+ctx = ClientContext(site_url).with_credentials(
+    UserCredential("sgorgees@oldworldind.com", "Turtle10!")
+)
+# 3. Target a folder (e.g. Documents)
+folder = ctx.web.get_folder_by_server_relative_url("/personal/you_contoso_onmicrosoft_com/Documents")
+folder = ctx.web.get_folder_by_server_relative_url("/personal/you_contoso_onmicrosoft_com/Documents")
+
+# 4. Upload your text file
+with open("hello.txt", "rb") as f:
+    file_content = f.read()
+uploaded = folder.upload_file("hello.txt", file_content).execute_query()
+
+print("✔ Uploaded at:", uploaded.serverRelativeUrl)
 
 project = AIProjectClient(
     credential=DefaultAzureCredential(),
