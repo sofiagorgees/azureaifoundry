@@ -39,7 +39,7 @@ while True:
         model=model_name,
         messages=chat_history,
         temperature=0.7,
-        max_tokens=500
+        max_tokens=1000
     )
 
     # Get assistant's reply
