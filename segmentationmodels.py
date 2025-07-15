@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv
 from azure.ai.projects import AIProjectClient
 from azure.identity import DefaultAzureCredential
-from azure.ai.agents.models import ListSortOrder
+from azure.ai.agents.models import ListSortOrder, FilePurpose, FileSearchTool
 
 load_dotenv()
 # Upload a file to OneDrive for Business using Office365-REST-Python-Client
@@ -16,7 +16,7 @@ load_dotenv()
 # folder = ctx.web.get_folder_by_server_relative_url(os.getenv("FOLDER_CTX_URL"))
 
 # Create project client
-project = AIProjectClient(
+project = AIProjectClient( 
     credential=DefaultAzureCredential(),
     endpoint=os.getenv("AZURE_FOUNDRY_ENDPOINT"))
 
@@ -34,22 +34,38 @@ agent_choice = input("Enter the number (1-5) of the agent you want to chat with:
 print("Which model would you like to use?\n\t1. gpt-4o\n\t2. gpt-4.1")
 model_choice = input("Enter the number of the model you want to use (enter 1 or 2): ")
 if model_choice == "1":
-    model = "gpt-4o"
+    model_name = "gpt-4o"
 elif model_choice == "2":
-    model = "gpt-4.1"
+    model_name = "gpt-4.1"
 agent = project.agents.get_agent(agentIdList[int(agent_choice) - 1])
 
-# Updates agent with chosen model
+# File add and search
+file_path ="PUT FILE PATH HERE"
+
+# Upload the file
+file = project.agents.files.upload_and_poll(file_path=file_path, purpose=FilePurpose.AGENTS)
+print(f"Uploaded file, file ID: {file.id}")
+
+# Create a vector store for the file
+vector_store = project.vector_stores.create_and_poll(file_ids=[file.id], name="my_vectorstore")
+print(f"Created vector store, vector store ID: {vector_store.id}")
+
+# Create a file search tool using the vector store
+file_search_tool = FileSearchTool(vector_store_ids= [vector_store.id])
+
+# Updates agent with chosen model and file search tool
 project.agents.update_agent(
     agent.id,
-    model=model
+    model=model_name,
+    tools=[file_search_tool],
+    tool_resources= file_search_tool.resources
 )
 
 # Create new thread
 thread = project.agents.threads.create()
 
 print(f"Created thread, ID: {thread.id}")
-print('Hello, I am the ' + agents[int(agent_choice) - 1] + ' agent using '+ model +' model!\n If you want to end the chat at anytime type exit, quit, or q')
+print('Hello, I am the ' + agents[int(agent_choice) - 1] + ' agent using '+ model_name +' model!\n If you want to end the chat at anytime type exit, quit, or q')
 
 # Loop for conversation
 while True:
@@ -78,7 +94,7 @@ while True:
         print("----------------CURRENT THREAD: \n")
     # Write updated thread to text file
     with open((thread.id + ".txt"), "w", encoding = "utf-8") as output_file:
-        output_file.write('MessageRole.AGENT:Hello, I am the ' + agents[int(agent_choice) - 1] + ' agent using '+ model +' model!\n')
+        output_file.write('MessageRole.AGENT:Hello, I am the ' + agents[int(agent_choice) - 1] + ' agent using '+ model_name +' model!\n')
         for message in messages:
             if message.text_messages:
                 # Print message to console
