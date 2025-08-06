@@ -5,15 +5,6 @@ from azure.identity import DefaultAzureCredential
 from azure.ai.agents.models import ListSortOrder, FilePurpose, FileSearchTool
 
 load_dotenv()
-# Upload a file to OneDrive for Business using Office365-REST-Python-Client
-#from office365.sharepoint.client_context import ClientContext
-#from office365.runtime.auth.user_credential import 
-
-# 1. Point at your OneDrive for Business site (it’s just a special SP site):
-# site_url = os.getenv("SITE_URL")
-# ctx = ClientContext(site_url).with_device_flow()
-# # 3. Target a folder (e.g. Documents)
-# folder = ctx.web.get_folder_by_server_relative_url(os.getenv("FOLDER_CTX_URL"))
 
 # Create project client
 project = AIProjectClient( 
@@ -31,12 +22,12 @@ for i in range(len(agentIdList)):
 agent_choice = input("Enter the number (1-5) of the agent you want to chat with: ")
 
 # Get gpt model choice from user
-print("Which model would you like to use?\n\t1. gpt-4o\n\t2. gpt-4.1")
+print("Which model would you like to use?\n\t1. gpt-4o\n\t2. gpt-4")
 model_choice = input("Enter the number of the model you want to use (enter 1 or 2): ")
 if model_choice == "1":
     model_name = "gpt-4o"
 elif model_choice == "2":
-    model_name = "gpt-4.1"
+    model_name = "gpt-4"
 agent = project.agents.get_agent(agentIdList[int(agent_choice) - 1])
 
 # File add and search
@@ -65,7 +56,8 @@ project.agents.update_agent(
 thread = project.agents.threads.create()
 
 print(f"Created thread, ID: {thread.id}")
-print('Hello, I am the ' + agents[int(agent_choice) - 1] + ' agent using '+ model_name +' model!\n If you want to end the chat at anytime type exit, quit, or q')
+print('Hello, I am the ' + agents[int(agent_choice) - 1] + ' agent using '+ model_name +' model!\n If you'
+' want to end the chat at anytime type exit, quit, or q')
 
 # Loop for conversation
 while True:
@@ -103,8 +95,4 @@ while True:
                 output_file.write(f"{message.role}: {message.text_messages[-1].text.value}\n") 
         output_file.write(f"end of thread {thread.id}\n")
 
-
-# with open((thread.id + ".txt"), "rb") as f:
-#     file_content = f.read()
-# uploaded = folder.upload_file((thread.id + ".txt"), file_content).execute_query()       
-# print("✔ Uploaded at:", uploaded.serverRelativeUrl)
+        print(f"Updated thread written to {thread.id}.txt")

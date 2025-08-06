@@ -1,9 +1,12 @@
 import os
+from dotenv import load_dotenv
 from openai import AzureOpenAI
 
+load_dotenv()
+
 endpoint = "https://oldworldai.cognitiveservices.azure.com/"
-model_name = "o4-mini"
-deployment = "o4-mini"
+model_name = "gpt-4"
+deployment = "gpt-4"
 
 subscription_key = os.getenv("AZURE_OPENAI_API_KEY")
 api_version = "2024-12-01-preview"
@@ -14,19 +17,19 @@ client = AzureOpenAI(
     api_key=subscription_key
 )
 
-response = client.chat.completions.create(
-    messages=[
-        {
-            "role": "system",
-            "content": "You are a helpful assistant.",
-        },
-        {
-            "role": "user",
-            "content": "I am going to Paris, what should I see?",
-        }
-    ],
-    max_completion_tokens=100000,
-    model=deployment
-)
+conversation=[{"role": "system", "content": "You will model the disinterested value seeker from the OWI segmentation study. Answer questions and provide insightful responses as a disinterested value seeker would reply."}]
+print('Hello, I am the segmentation model agent using gpt 4!\n If you want to end the chat at anytime type exit, quit, or q')
 
-print(response.choices[0].message.content)
+while True:
+    user_input = input("You: ")      
+    if user_input.lower() in ["exit", "quit", "q"]:
+        print("Ending chat session.")    
+        break
+    conversation.append({"role": "user", "content": user_input})
+    response = client.chat.completions.create(
+        model="gpt-4", # model = "deployment_name".
+        messages=conversation
+    )
+
+    conversation.append({"role": "assistant", "content": response.choices[0].message.content})
+    print("\n" + response.choices[0].message.content + "\n")
